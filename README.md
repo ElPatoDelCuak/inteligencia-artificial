@@ -1,12 +1,12 @@
 # Portfolio de Inteligencia Artificial
 
-Este repositorio contiene una colección de prácticas, exámenes y proyectos realizados durante el curso de Inteligencia Artificial. El contenido está organizado en Resultados de Aprendizaje (RA), cubriendo desde los fundamentos de Python hasta algoritmos de Machine Learning.
+Este repositorio contiene una colección de prácticas, exámenes y proyectos realizados durante el curso de DAW la asignatura de Inteligencia Artificial. El contenido está organizado en Resultados de Aprendizaje (RA), cubriendo desde los fundamentos de Python hasta algoritmos de Machine Learning.
 
 ## 🛠️ Tecnologías Utilizadas
 
 El proyecto utiliza principalmente **Python** y su ecosistema de ciencia de datos:
 
-*   **Lenguajes**: Python 3.x
+*   **Lenguajes**: Python 3.12
 *   **Análisis de Datos**: Pandas, NumPy
 *   **Machine Learning**: Scikit-learn (Clasificación, Train_test_split)
 *   **Entornos**: Jupyter Notebooks, Virtualenv (venv)
@@ -43,6 +43,3 @@ Implementación de algoritmos de aprendizaje automático.
 *   **Practica_train_test**:
     *   División de datasets en conjuntos de entrenamiento y prueba.
     *   Análisis de precisión (`accuracy_analysis.ipynb`) con datasets como `breaking_bad.csv`.
-
----
-*Este documento sirve como guía general del trabajo realizado en la asignatura.*
