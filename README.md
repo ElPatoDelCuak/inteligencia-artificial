@@ -1,6 +1,6 @@
 # Portfolio de Inteligencia Artificial
 
-Este repositorio contiene una colección de prácticas, exámenes y proyectos realizados durante el curso de DAW la asignatura de Inteligencia Artificial. El contenido está organizado en Resultados de Aprendizaje (RA), cubriendo desde los fundamentos de Python hasta algoritmos de Machine Learning.
+Este repositorio contiene una colección de prácticas, exámenes y proyectos realizados durante el curso de Desarrollo de Aplicaciones Web (DAW), en la asignatura de Inteligencia Artificial. El contenido está organizado en Resultados de Aprendizaje (RA), cubriendo desde los fundamentos de Python hasta algoritmos de Machine Learning.
 
 ## 🛠️ Tecnologías Utilizadas
 
