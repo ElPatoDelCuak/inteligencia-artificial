@@ -35,3 +35,7 @@ dist/
 # Temp
 *.tmp
 *.swp
+
+# RA4: ignore all in Aprenentatge_Supervisat_1 except notebook
+RA4/Jupyter_Notebook/Aprenentatge_Supervisat/Aprenentatge_Supervisat_1/*
+!RA4/Jupyter_Notebook/Aprenentatge_Supervisat/Aprenentatge_Supervisat_1/test.ipynb
