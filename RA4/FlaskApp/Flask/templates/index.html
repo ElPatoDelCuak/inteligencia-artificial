@@ -1,78 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drone Loss Classifier - Tactical Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-    <div class="background-overlay"></div>
-    
     <main class="container">
         <header>
-            <h1>Tactical Drone Loss Analysis</h1>
-            <p class="subtitle">Real-time Equipment Loss Prediction & Classification</p>
+            <h1>Equipment Analysis Dashboard</h1>
+            <p class="subtitle">Predicting daily drone attrition through combined arms analysis</p>
         </header>
 
         <section class="metrics-grid">
-            <div class="metric-card" id="knn-card">
+            <div class="metric-card">
                 <div class="model-name">K-Nearest Neighbors</div>
-                <div class="accuracy">{{ (metrics['knn']['accuracy'] * 100) | round(2) }}%</div>
-                <div class="label">Accuracy Score</div>
+                <div class="accuracy">{{ (metrics['knn']['accuracy'] * 100) | round(1) }}%</div>
+                <div class="label">Reliability Score</div>
             </div>
-            <div class="metric-card" id="perceptron-card">
-                <div class="model-name">Perceptron</div>
-                <div class="accuracy">{{ (metrics['perceptron']['accuracy'] * 100) | round(2) }}%</div>
-                <div class="label">Accuracy Score</div>
+            <div class="metric-card">
+                <div class="model-name">Perceptron Network</div>
+                <div class="accuracy">{{ (metrics['perceptron']['accuracy'] * 100) | round(1) }}%</div>
+                <div class="label">Reliability Score</div>
             </div>
-            <div class="metric-card" id="nb-card">
+            <div class="metric-card">
                 <div class="model-name">Naive Bayes</div>
-                <div class="accuracy">{{ (metrics['nb']['accuracy'] * 100) | round(2) }}%</div>
-                <div class="label">Accuracy Score</div>
+                <div class="accuracy">{{ (metrics['nb']['accuracy'] * 100) | round(1) }}%</div>
+                <div class="label">Reliability Score</div>
             </div>
         </section>
 
-        <div class="content-wrapper">
-            <section class="prediction-form">
-                <h2>Predict Daily Drone Losses</h2>
-                <p>Input daily equipment loss values to determine the probability of high drone attrition.</p>
-                
-                <form id="predict-form">
-                    <div class="form-grid">
-                        {% for feature in features %}
-                        <div class="input-group">
-                            <label for="{{ feature }}">{{ feature | replace('_', ' ') | capitalize }}</label>
-                            <input type="number" id="{{ feature }}" name="{{ feature }}" value="0" required>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <button type="submit" class="btn-predict">Analyze Deployment</button>
-                </form>
-            </section>
+        <section class="info-section">
+            <div class="info-card">
+                <h3>System Intelligence</h3>
+                <p>This tactical engine cross-references deployment data with historical patterns from the Russia-Ukraine conflict. By analyzing variations in mechanized and support unit losses, it identifies the statistical probability of high drone activity for the current operational day.</p>
+            </div>
+        </section>
 
-            <section class="results-section" id="results-section" style="display: none;">
-                <h2>Classification Results</h2>
+        <section class="prediction-form">
+            <h2>Operational Data Input</h2>
+            <form id="predict-form">
+                <div class="form-grid">
+                    {% for feature in features %}
+                    <div class="input-group">
+                        <label for="{{ feature }}">{{ feature | replace('_', ' ') }}</label>
+                        <input type="number" id="{{ feature }}" name="{{ feature }}" value="0" required>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-predict">Execute Analysis</button>
+            </form>
+        </section>
+
+        <section class="results-section" id="results-section" style="display: none;">
+            <div class="results-layout">
                 <div class="results-grid">
                     <div class="result-item">
-                        <span>KNN:</span>
+                        <span>KNN Prediction</span>
                         <strong id="res-knn">---</strong>
                     </div>
                     <div class="result-item">
-                        <span>Perceptron:</span>
+                        <span>Perceptron Prediction</span>
                         <strong id="res-perceptron">---</strong>
                     </div>
                     <div class="result-item">
-                        <span>Naive Bayes:</span>
+                        <span>Naive Bayes Prediction</span>
                         <strong id="res-nb">---</strong>
                     </div>
                 </div>
-            </section>
-        </div>
+                <div class="chart-container">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script>
+        let predictionChart = null;
+
+        function updateChart(results) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            const data = {
+                labels: ['KNN', 'Perceptron', 'NB'],
+                datasets: [{
+                    label: 'Attrition Level',
+                    data: [
+                        results.knn === 'High' ? 1 : 0.05,
+                        results.perceptron === 'High' ? 1 : 0.05,
+                        results.nb === 'High' ? 1 : 0.05
+                    ],
+                    backgroundColor: [
+                        results.knn === 'High' ? '#f87171' : '#4ade80',
+                        results.perceptron === 'High' ? '#f87171' : '#4ade80',
+                        results.nb === 'High' ? '#f87171' : '#4ade80'
+                    ],
+                    borderRadius: 8,
+                    barThickness: 40
+                }]
+            };
+
+            if (predictionChart) {
+                predictionChart.data = data;
+                predictionChart.update();
+            } else {
+                predictionChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 1.1,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        if (value === 1) return 'HIGH';
+                                        if (value === 0) return 'LOW';
+                                        return '';
+                                    },
+                                    color: '#94a3b8',
+                                    font: { weight: 'bold' }
+                                },
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+            }
+        }
+
         document.getElementById('predict-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -97,17 +168,19 @@
                     document.getElementById('res-perceptron').innerText = result.perceptron;
                     document.getElementById('res-nb').innerText = result.nb;
                     
-                    // Add result classes
                     ['knn', 'perceptron', 'nb'].forEach(m => {
                         const el = document.getElementById('res-' + m);
                         el.className = result[m] === 'High' ? 'text-high' : 'text-low';
                     });
-                    
-                    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+
+                    updateChart(result);
+                    setTimeout(() => {
+                        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
                 }
             } catch (err) {
                 console.error(err);
-                alert('An error occurred during classification.');
+                alert('Connection error.');
             }
         });
     </script>
