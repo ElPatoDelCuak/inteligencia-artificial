@@ -33,12 +33,22 @@
                 <div class="accuracy">{{ (metrics['nb']['accuracy'] * 100) | round(1) }}%</div>
                 <div class="label">Reliability Score</div>
             </div>
+            <div class="metric-card">
+                <div class="model-name">Decision Tree</div>
+                <div class="accuracy">{{ (metrics['tree']['accuracy'] * 100) | round(1) }}%</div>
+                <div class="label">Reliability Score</div>
+            </div>
+            <div class="metric-card">
+                <div class="model-name">Neural Network (MLP)</div>
+                <div class="accuracy">{{ (metrics['nn']['accuracy'] * 100) | round(1) }}%</div>
+                <div class="label">Reliability Score</div>
+            </div>
         </section>
 
         <section class="info-section">
             <div class="info-card">
                 <h3>System Intelligence</h3>
-                <p>This tactical engine cross-references deployment data with historical patterns from the Russia-Ukraine conflict. By analyzing variations in mechanized and support unit losses, it identifies the statistical probability of high drone activity for the current operational day.</p>
+                <p>This tactical engine cross-references deployment data with historical patterns from the Russia-Ukraine conflict. By analyzing variations in mechanized and support unit losses, it identifies the statistical probability of high drone activity using five distinct classification algorithms.</p>
             </div>
         </section>
 
@@ -72,6 +82,14 @@
                         <span>Naive Bayes Prediction</span>
                         <strong id="res-nb">---</strong>
                     </div>
+                    <div class="result-item">
+                        <span>Decision Tree Prediction</span>
+                        <strong id="res-tree">---</strong>
+                    </div>
+                    <div class="result-item">
+                        <span>Neural Network Prediction</span>
+                        <strong id="res-nn">---</strong>
+                    </div>
                 </div>
                 <div class="chart-container">
                     <canvas id="predictionChart"></canvas>
@@ -86,21 +104,25 @@
         function updateChart(results) {
             const ctx = document.getElementById('predictionChart').getContext('2d');
             const data = {
-                labels: ['KNN', 'Perceptron', 'NB'],
+                labels: ['KNN', 'Perceptron', 'NB', 'Tree', 'MLP'],
                 datasets: [{
                     label: 'Attrition Level',
                     data: [
                         results.knn === 'High' ? 1 : 0.05,
                         results.perceptron === 'High' ? 1 : 0.05,
-                        results.nb === 'High' ? 1 : 0.05
+                        results.nb === 'High' ? 1 : 0.05,
+                        results.tree === 'High' ? 1 : 0.05,
+                        results.nn === 'High' ? 1 : 0.05
                     ],
                     backgroundColor: [
                         results.knn === 'High' ? '#f87171' : '#4ade80',
                         results.perceptron === 'High' ? '#f87171' : '#4ade80',
-                        results.nb === 'High' ? '#f87171' : '#4ade80'
+                        results.nb === 'High' ? '#f87171' : '#4ade80',
+                        results.tree === 'High' ? '#f87171' : '#4ade80',
+                        results.nn === 'High' ? '#f87171' : '#4ade80'
                     ],
                     borderRadius: 8,
-                    barThickness: 40
+                    barThickness: 30
                 }]
             };
 
@@ -167,8 +189,10 @@
                     document.getElementById('res-knn').innerText = result.knn;
                     document.getElementById('res-perceptron').innerText = result.perceptron;
                     document.getElementById('res-nb').innerText = result.nb;
+                    document.getElementById('res-tree').innerText = result.tree;
+                    document.getElementById('res-nn').innerText = result.nn;
                     
-                    ['knn', 'perceptron', 'nb'].forEach(m => {
+                    ['knn', 'perceptron', 'nb', 'tree', 'nn'].forEach(m => {
                         const el = document.getElementById('res-' + m);
                         el.className = result[m] === 'High' ? 'text-high' : 'text-low';
                     });

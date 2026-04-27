@@ -8,6 +8,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import Perceptron
 from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
 
 def train():
@@ -71,13 +73,28 @@ def train():
     metrics['perceptron'] = {'accuracy': round(perceptron_acc, 4)}
 
     # 3) Naive Bayes
-    # Note: GaussianNB doesn't strictly need scaling but the notebook didn't use a pipeline for it.
-    # However, for consistency in the app, I'll keep it as is.
     nb_model = GaussianNB()
     nb_model.fit(X_train, y_train)
     nb_acc = accuracy_score(y_test, nb_model.predict(X_test))
     joblib.dump(nb_model, 'models/nb_model.joblib')
     metrics['nb'] = {'accuracy': round(nb_acc, 4)}
+
+    # 4) Decision Tree (NEW)
+    tree_model = DecisionTreeClassifier(random_state=42, max_depth=5)
+    tree_model.fit(X_train, y_train)
+    tree_acc = accuracy_score(y_test, tree_model.predict(X_test))
+    joblib.dump(tree_model, 'models/tree_model.joblib')
+    metrics['tree'] = {'accuracy': round(tree_acc, 4)}
+
+    # 5) Neural Network (MLP) (NEW)
+    nn_model = Pipeline([
+        ('scaler', StandardScaler()),
+        ('mlp', MLPClassifier(hidden_layer_sizes=(10, 5), max_iter=1000, random_state=42))
+    ])
+    nn_model.fit(X_train, y_train)
+    nn_acc = accuracy_score(y_test, nn_model.predict(X_test))
+    joblib.dump(nn_model, 'models/nn_model.joblib')
+    metrics['nn'] = {'accuracy': round(nn_acc, 4)}
 
     # Save metrics
     with open('models/metrics.json', 'w') as f:

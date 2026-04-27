@@ -1,1 +1,1 @@
-{"knn": {"accuracy": 0.8741}, "perceptron": {"accuracy": 0.8639}, "nb": {"accuracy": 0.5782}}
+{"knn": {"accuracy": 0.8741}, "perceptron": {"accuracy": 0.8639}, "nb": {"accuracy": 0.5782}, "tree": {"accuracy": 0.8878}, "nn": {"accuracy": 0.8946}}
