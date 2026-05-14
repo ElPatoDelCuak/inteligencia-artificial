@@ -7,49 +7,70 @@ from pathlib import Path
 
 app = Flask(__name__)
 
-# Load models and metadata
 models_path = Path('models')
-knn_model = joblib.load(models_path / 'knn_model.joblib')
-perceptron_model = joblib.load(models_path / 'perceptron_model.joblib')
-nb_model = joblib.load(models_path / 'nb_model.joblib')
-tree_model = joblib.load(models_path / 'tree_model.joblib')
-nn_model = joblib.load(models_path / 'nn_model.joblib')
 
-with open(models_path / 'metrics.json', 'r') as f:
-    metrics = json.load(f)
-
+# Load features on startup
 with open(models_path / 'features.json', 'r') as f:
     feature_names = json.load(f)
 
 @app.route('/')
 def index():
-    return render_template('index.html', metrics=metrics, features=feature_names)
+    try:
+        with open(models_path / 'metrics.json', 'r') as f:
+            metrics = json.load(f)
+        with open(models_path / 'stats.json', 'r') as f:
+            stats = json.load(f)
+        with open(models_path / 'examples.json', 'r') as f:
+            examples = json.load(f)
+    except FileNotFoundError:
+        metrics = {}
+        stats = {}
+        examples = []
+        
+    return render_template('index.html', metrics=metrics, features=feature_names, stats=stats, examples=examples)
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         data = request.json
-        # Create a DataFrame with the features in the correct order
-        input_data = pd.DataFrame([data], columns=feature_names)
+        selected_model = data.get('model', 'knn')
+        features_data = data.get('features')
         
-        # Predictions
-        knn_pred = int(knn_model.predict(input_data)[0])
-        perceptron_pred = int(perceptron_model.predict(input_data)[0])
-        nb_pred = int(nb_model.predict(input_data)[0])
-        tree_pred = int(tree_model.predict(input_data)[0])
-        nn_pred = int(nn_model.predict(input_data)[0])
+        input_data = pd.DataFrame([features_data], columns=feature_names)
+        
+        model = joblib.load(models_path / f'{selected_model}_model.joblib')
+        
+        pred = int(model.predict(input_data)[0])
         
         results = {
-            'knn': 'High' if knn_pred == 1 else 'Low',
-            'perceptron': 'High' if perceptron_pred == 1 else 'Low',
-            'nb': 'High' if nb_pred == 1 else 'Low',
-            'tree': 'High' if tree_pred == 1 else 'Low',
-            'nn': 'High' if nn_pred == 1 else 'Low'
+            'model': selected_model,
+            'prediction': 'High' if pred == 1 else 'Low'
         }
         
         return jsonify(results)
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@app.route('/train', methods=['POST'])
+def train():
+    try:
+        data = request.json
+        model_name = data.get('model')
+        params = data.get('params', {})
+        
+        from train_models import load_and_process_data, train_single_model
+        X, y, _ = load_and_process_data()
+        
+        from sklearn.model_selection import train_test_split
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42, stratify=y
+        )
+        
+        metrics = train_single_model(model_name, params, X_train, y_train, X_test, y_test)
+        
+        return jsonify({'success': True, 'metrics': metrics})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)

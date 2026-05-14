@@ -17,44 +17,183 @@
             <p class="subtitle">Predicting daily drone attrition through combined arms analysis</p>
         </header>
 
-        <section class="metrics-grid">
-            <div class="metric-card">
-                <div class="model-name">K-Nearest Neighbors</div>
-                <div class="accuracy">{{ (metrics['knn']['accuracy'] * 100) | round(1) }}%</div>
-                <div class="label">Reliability Score</div>
-            </div>
-            <div class="metric-card">
-                <div class="model-name">Perceptron Network</div>
-                <div class="accuracy">{{ (metrics['perceptron']['accuracy'] * 100) | round(1) }}%</div>
-                <div class="label">Reliability Score</div>
-            </div>
-            <div class="metric-card">
-                <div class="model-name">Naive Bayes</div>
-                <div class="accuracy">{{ (metrics['nb']['accuracy'] * 100) | round(1) }}%</div>
-                <div class="label">Reliability Score</div>
-            </div>
-            <div class="metric-card">
-                <div class="model-name">Decision Tree</div>
-                <div class="accuracy">{{ (metrics['tree']['accuracy'] * 100) | round(1) }}%</div>
-                <div class="label">Reliability Score</div>
-            </div>
-            <div class="metric-card">
-                <div class="model-name">Neural Network (MLP)</div>
-                <div class="accuracy">{{ (metrics['nn']['accuracy'] * 100) | round(1) }}%</div>
-                <div class="label">Reliability Score</div>
-            </div>
-        </section>
-
+        <!-- DATASET & ANALYSIS SECTION -->
         <section class="info-section">
             <div class="info-card">
-                <h3>System Intelligence</h3>
-                <p>This tactical engine cross-references deployment data with historical patterns from the Russia-Ukraine conflict. By analyzing variations in mechanized and support unit losses, it identifies the statistical probability of high drone activity using five distinct classification algorithms.</p>
+                <h3>Dataset Information</h3>
+                <p>This application analyzes daily equipment losses in the Russia-Ukraine conflict. The target variable is whether the daily variation in drone losses is above the median (High) or not (Low).</p>
+                <p>Below are the statistical studies performed on the data prior to training.</p>
             </div>
         </section>
 
+        <!-- DATA SUMMARY SECTION -->
+        <section class="metrics-section">
+            <h2>Data Summary & Examples</h2>
+            
+            <div class="summary-block" style="margin-bottom: 2rem;">
+                <h3>Statistical Summary (Daily Variation)</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">Showing mean, standard deviation, and extremes.</p>
+                <div class="table-container" style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Statistic</th>
+                                {% for col in stats.keys() %}
+                                <th>{{ col | replace('_', ' ') }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in ['mean', 'std', 'min', 'max'] %}
+                            <tr>
+                                <td><strong>{{ stat | upper }}</strong></td>
+                                {% for col, vals in stats.items() %}
+                                <td>{{ vals[stat] | round(2) if vals[stat] is not none else 'N/A' }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="summary-block">
+                <h3>Data Examples (Daily Variation)</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">First 5 rows of the processed dataset.</p>
+                <div class="table-container" style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                {% if examples|length > 0 %}
+                                    {% for key in examples[0].keys() %}
+                                    <th>{{ key | replace('_', ' ') }}</th>
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in examples %}
+                            <tr>
+                                {% for key, val in row.items() %}
+                                <td>{{ val | round(1) if val is number else val }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- EDA SECTION -->
+        <section class="analysis-section">
+            <h2>Exploratory Data Analysis</h2>
+            <div class="plots-grid">
+                <div class="plot-card">
+                    <h3>Target Distribution</h3>
+                    <a href="{{ url_for('static', filename='images/dist_drone.png') }}" target="_blank">
+                        <img src="{{ url_for('static', filename='images/dist_drone.png') }}" alt="Target Distribution" style="cursor: pointer;">
+                    </a>
+                    <p>Shows the frequency of daily drone loss variations.</p>
+                    <a href="{{ url_for('static', filename='images/dist_drone.png') }}" target="_blank" class="btn-predict" style="display:inline-block; margin-top:10px; width:auto; font-size:0.75rem; padding:6px 12px;">View Full Size</a>
+                </div>
+                
+                <div class="plot-card">
+                    <h3>Correlation Heatmap</h3>
+                    <a href="{{ url_for('static', filename='images/heatmap.png') }}" target="_blank">
+                        <img src="{{ url_for('static', filename='images/heatmap.png') }}" alt="Correlation Heatmap" style="cursor: pointer;">
+                    </a>
+                    <p>Shows correlations between top features and drone losses.</p>
+                    <a href="{{ url_for('static', filename='images/heatmap.png') }}" target="_blank" class="btn-predict" style="display:inline-block; margin-top:10px; width:auto; font-size:0.75rem; padding:6px 12px;">View Full Size</a>
+                </div>
+                
+                <div class="plot-card">
+                    <h3>Top Feature vs Target</h3>
+                    <a href="{{ url_for('static', filename='images/boxplot.png') }}" target="_blank">
+                        <img src="{{ url_for('static', filename='images/boxplot.png') }}" alt="Boxplot" style="cursor: pointer;">
+                    </a>
+                    <p>Comparison of the most correlated feature against the target state.</p>
+                    <a href="{{ url_for('static', filename='images/boxplot.png') }}" target="_blank" class="btn-predict" style="display:inline-block; margin-top:10px; width:auto; font-size:0.75rem; padding:6px 12px;">View Full Size</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- METRICS SECTION -->
+        <section class="metrics-section">
+            <h2>Model Performance (Global Metrics)</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Accuracy</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1-Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for model, vals in metrics.items() %}
+                        <tr>
+                            <td><strong>{{ model | upper }}</strong></td>
+                            <td>{{ (vals['accuracy'] * 100) | round(1) }}%</td>
+                            <td>{{ (vals['precision'] * 100) | round(1) }}%</td>
+                            <td>{{ (vals['recall'] * 100) | round(1) }}%</td>
+                            <td>{{ (vals['f1'] * 100) | round(1) }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE TRAINING SECTION -->
+        <section class="training-section">
+            <h2>Interactive Model Training</h2>
+            <p>Retrain the models with custom hyperparameters.</p>
+            <form id="train-form" class="horizontal-form">
+                <div class="input-group">
+                    <label for="train-model">Model</label>
+                    <select id="train-model" name="model" required>
+                        <option value="knn">KNN</option>
+                        <option value="tree">Decision Tree</option>
+                        <option value="nn">Neural Network (MLP)</option>
+                        <option value="perceptron">Perceptron</option>
+                        <option value="nb">Naive Bayes</option>
+                    </select>
+                </div>
+                
+                <!-- Hyperparameters -->
+                <div class="input-group" id="param-knn">
+                    <label for="n_neighbors">K Neighbors</label>
+                    <input type="number" id="n_neighbors" name="n_neighbors" value="7" min="1">
+                </div>
+                
+                <div class="input-group" id="param-tree" style="display:none;">
+                    <label for="max_depth">Max Depth</label>
+                    <input type="number" id="max_depth" name="max_depth" value="5" min="1">
+                </div>
+                
+                <button type="submit" class="btn-predict">Train Model</button>
+            </form>
+            <div id="train-result" style="display:none; margin-top: 1rem; color: #16a34a;"></div>
+        </section>
+
+        <!-- PREDICTION SECTION -->
         <section class="prediction-form">
-            <h2>Operational Data Input</h2>
+            <h2>Operational Data Input & Prediction</h2>
             <form id="predict-form">
+                <div class="input-group" style="margin-bottom: 1.5rem;">
+                    <label for="predict-model">Select Model for Prediction</label>
+                    <select id="predict-model" name="model" required style="width: 100%; max-width: 300px;">
+                        <option value="knn">KNN</option>
+                        <option value="perceptron">Perceptron</option>
+                        <option value="nb">Naive Bayes</option>
+                        <option value="tree">Decision Tree</option>
+                        <option value="nn">Neural Network (MLP)</option>
+                    </select>
+                </div>
+
                 <div class="form-grid">
                     {% for feature in features %}
                     <div class="input-group">
@@ -67,118 +206,83 @@
             </form>
         </section>
 
+        <!-- RESULTS SECTION -->
         <section class="results-section" id="results-section" style="display: none;">
             <div class="results-layout">
                 <div class="results-grid">
                     <div class="result-item">
-                        <span>KNN Prediction</span>
-                        <strong id="res-knn">---</strong>
+                        <span>Prediction Result</span>
+                        <strong id="res-val">---</strong>
                     </div>
-                    <div class="result-item">
-                        <span>Perceptron Prediction</span>
-                        <strong id="res-perceptron">---</strong>
-                    </div>
-                    <div class="result-item">
-                        <span>Naive Bayes Prediction</span>
-                        <strong id="res-nb">---</strong>
-                    </div>
-                    <div class="result-item">
-                        <span>Decision Tree Prediction</span>
-                        <strong id="res-tree">---</strong>
-                    </div>
-                    <div class="result-item">
-                        <span>Neural Network Prediction</span>
-                        <strong id="res-nn">---</strong>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="predictionChart"></canvas>
                 </div>
             </div>
         </section>
     </main>
 
     <script>
-        let predictionChart = null;
+        // Handle hyperparameter visibility
+        document.getElementById('train-model').addEventListener('change', function() {
+            const val = this.value;
+            document.getElementById('param-knn').style.display = val === 'knn' ? 'block' : 'none';
+            document.getElementById('param-tree').style.display = val === 'tree' ? 'block' : 'none';
+        });
 
-        function updateChart(results) {
-            const ctx = document.getElementById('predictionChart').getContext('2d');
-            const data = {
-                labels: ['KNN', 'Perceptron', 'NB', 'Tree', 'MLP'],
-                datasets: [{
-                    label: 'Attrition Level',
-                    data: [
-                        results.knn === 'High' ? 1 : 0.05,
-                        results.perceptron === 'High' ? 1 : 0.05,
-                        results.nb === 'High' ? 1 : 0.05,
-                        results.tree === 'High' ? 1 : 0.05,
-                        results.nn === 'High' ? 1 : 0.05
-                    ],
-                    backgroundColor: [
-                        results.knn === 'High' ? '#f87171' : '#4ade80',
-                        results.perceptron === 'High' ? '#f87171' : '#4ade80',
-                        results.nb === 'High' ? '#f87171' : '#4ade80',
-                        results.tree === 'High' ? '#f87171' : '#4ade80',
-                        results.nn === 'High' ? '#f87171' : '#4ade80'
-                    ],
-                    borderRadius: 8,
-                    barThickness: 30
-                }]
-            };
-
-            if (predictionChart) {
-                predictionChart.data = data;
-                predictionChart.update();
-            } else {
-                predictionChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: data,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 1.1,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function(value) {
-                                        if (value === 1) return 'HIGH';
-                                        if (value === 0) return 'LOW';
-                                        return '';
-                                    },
-                                    color: '#94a3b8',
-                                    font: { weight: 'bold' }
-                                },
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                            },
-                            x: {
-                                ticks: { color: '#94a3b8' },
-                                grid: { display: false }
-                            }
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: false }
-                        }
-                    }
-                });
+        // Handle training
+        document.getElementById('train-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const model = document.getElementById('train-model').value;
+            const params = {};
+            
+            if (model === 'knn') {
+                params.n_neighbors = document.getElementById('n_neighbors').value;
+            } else if (model === 'tree') {
+                params.max_depth = document.getElementById('max_depth').value;
             }
-        }
+            
+            try {
+                const response = await fetch('/train', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, params })
+                });
+                const result = await response.json();
+                
+                const resultDiv = document.getElementById('train-result');
+                resultDiv.style.display = 'block';
+                if (result.success) {
+                    resultDiv.innerText = `Model ${model} trained successfully! Acc: ${(result.metrics.accuracy * 100).toFixed(1)}%`;
+                    resultDiv.style.color = '#16a34a';
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    resultDiv.innerText = 'Error: ' + result.error;
+                    resultDiv.style.color = '#dc2626';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error.');
+            }
+        });
 
+        // Handle prediction
         document.getElementById('predict-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
-            const data = {};
+            const features = {};
+            let model = 'knn';
+            
             formData.forEach((value, key) => {
-                data[key] = parseFloat(value);
+                if (key === 'model') {
+                    model = value;
+                } else {
+                    features[key] = parseFloat(value);
+                }
             });
 
             try {
                 const response = await fetch('/predict', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ model, features })
                 });
                 const result = await response.json();
                 
@@ -186,18 +290,10 @@
                     alert('Error: ' + result.error);
                 } else {
                     document.getElementById('results-section').style.display = 'block';
-                    document.getElementById('res-knn').innerText = result.knn;
-                    document.getElementById('res-perceptron').innerText = result.perceptron;
-                    document.getElementById('res-nb').innerText = result.nb;
-                    document.getElementById('res-tree').innerText = result.tree;
-                    document.getElementById('res-nn').innerText = result.nn;
+                    const resVal = document.getElementById('res-val');
+                    resVal.innerText = result.prediction;
+                    resVal.className = result.prediction === 'High' ? 'text-high' : 'text-low';
                     
-                    ['knn', 'perceptron', 'nb', 'tree', 'nn'].forEach(m => {
-                        const el = document.getElementById('res-' + m);
-                        el.className = result[m] === 'High' ? 'text-high' : 'text-low';
-                    });
-
-                    updateChart(result);
                     setTimeout(() => {
                         document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
                     }, 100);
