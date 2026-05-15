@@ -59,7 +59,7 @@
 
             <div class="summary-block">
                 <h3>Data Examples (Daily Variation)</h3>
-                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">First 5 rows of the processed dataset.</p>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">Full dataset exploration (6 rows per page).</p>
                 <div class="table-container" style="overflow-x: auto;">
                     <table>
                         <thead>
@@ -71,16 +71,17 @@
                                 {% endif %}
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for row in examples %}
-                            <tr>
-                                {% for key, val in row.items() %}
-                                <td>{{ val | round(1) if val is number else val }}</td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
+                        <tbody id="examples-tbody">
+                            <!-- Populated by JS -->
                         </tbody>
                     </table>
+                </div>
+                
+                <!-- Pagination Controls -->
+                <div class="pagination">
+                    <button id="prev-page" class="btn-pagination" disabled>&larr; Previous</button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button id="next-page" class="btn-pagination">Next &rarr;</button>
                 </div>
             </div>
         </section>
@@ -220,6 +221,54 @@
     </main>
 
     <script>
+        // Pagination Logic
+        const allExamples = {{ examples | tojson }};
+        const rowsPerPage = 6;
+        let currentPage = 1;
+        const totalPages = Math.ceil(allExamples.length / rowsPerPage);
+
+        function renderTable(page) {
+            const tbody = document.getElementById('examples-tbody');
+            tbody.innerHTML = '';
+            
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = allExamples.slice(start, end);
+
+            pageData.forEach(row => {
+                const tr = document.createElement('tr');
+                Object.values(row).forEach(val => {
+                    const td = document.createElement('td');
+                    td.textContent = typeof val === 'number' ? val.toFixed(1) : val;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('page-info').textContent = `Page ${page} of ${totalPages}`;
+            document.getElementById('prev-page').disabled = page === 1;
+            document.getElementById('next-page').disabled = page === totalPages;
+        }
+
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable(currentPage);
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable(currentPage);
+            }
+        });
+
+        // Initial render
+        if (allExamples.length > 0) {
+            renderTable(currentPage);
+        }
+
         // Handle hyperparameter visibility
         document.getElementById('train-model').addEventListener('change', function() {
             const val = this.value;

@@ -211,8 +211,8 @@ def main():
     with open('models/stats.json', 'w') as f:
         json.dump(stats, f)
 
-    # Save Examples (first 5 rows)
-    examples = daily.head(5).to_dict(orient='records')
+    # Save Examples (full dataset for pagination)
+    examples = daily.to_dict(orient='records')
     with open('models/examples.json', 'w') as f:
         json.dump(examples, f)
 
